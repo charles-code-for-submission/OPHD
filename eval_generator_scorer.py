@@ -69,79 +69,79 @@ def build_parser() -> argparse.ArgumentParser:
         description="Evaluate a loaded stage2 generator with a loaded stage1 scorer.",
     )
     data_group = ap.add_argument_group("Data and runtime")
-    data_group.add_argument("--data_name", type=str, default="ad")  # Dataset name; selects prompt and scorer-prompt variants.
-    data_group.add_argument("--train_jsonl", type=str, default="")  # Training jsonl used only when --train_scorer_on_reasoning is enabled.
-    data_group.add_argument("--test_jsonl", type=str, default=None)  # Explicit test jsonl path; mutually exclusive with --testslice.
-    data_group.add_argument("--testslice", type=int, nargs="*", default=[])  # Resolve test jsonl from slice/fold ids; takes precedence over --test_jsonl.
-    data_group.add_argument("--output_dir", type=str, required=True)  # Output directory for metrics, scores, generated reasoning, and retrained scorer artifacts.
-    data_group.add_argument("--device", type=int, default=0)  # CUDA device id used by both generator and scorer.
-    data_group.add_argument("--seed", type=int, default=7)  # Global random seed; also the fallback for data_seed.
-    data_group.add_argument("--data_seed", type=int, default=None)  # Data-stream / pair-sampling seed; falls back to seed when omitted.
+    data_group.add_argument("--data_name", type=str, default="ad")
+    data_group.add_argument("--train_jsonl", type=str, default="")
+    data_group.add_argument("--test_jsonl", type=str, default=None)
+    data_group.add_argument("--testslice", type=int, nargs="*", default=[])
+    data_group.add_argument("--output_dir", type=str, required=True)
+    data_group.add_argument("--device", type=int, default=0)
+    data_group.add_argument("--seed", type=int, default=7)
+    data_group.add_argument("--data_seed", type=int, default=None)
 
     reasoning_group = ap.add_argument_group("Reasoning cache and subset control")
-    reasoning_group.add_argument("--ehr_only_ablation", action=argparse.BooleanOptionalAction, default=False)  # Force both train and eval into EHR-only mode; no reasoning is loaded or generated, and no student is needed.
-    reasoning_group.add_argument("--reasoning_jsonl", type=str, default="")  # Test-set reasoning file; used directly in normal mode, and in fixed-test-subset mode its ids define the subset whenever the file already exists.
-    reasoning_group.add_argument("--train_reasoning_jsonl", type=str, default="")  # Training-set reasoning file; used directly in normal mode, and in fixed-train-subset mode its ids define the subset whenever the file already exists.
-    reasoning_group.add_argument("--train_cache_note", type=str, default="")  # Shared note name for reusable full-train caches, or for paired fixed train/test caches when subset sampling is enabled.
-    reasoning_group.add_argument("--train_cache_root", type=str, default="eval_generated_train_cache")  # Root directory used together with train_cache_note.
-    reasoning_group.add_argument("--train_subset_ratio", type=float, default=1.0)  # If <1.0, sample a fixed train subset into <data_name>_train_cache; if 1.0, pregenerate/use the full train cache upfront.
-    reasoning_group.add_argument("--test_subset_ratio", type=float, default=1.0)  # If <1.0, sample a fixed test subset into <data_name>_test_cache; if 1.0, keep the original testslice order and ids.
-    reasoning_group.add_argument("--subset_pos_ratio", type=float, default=-1.0)  # Optional target positive ratio for the sampled train subset; negative keeps the source prevalence. Ignored when train_subset_ratio=1.
-    reasoning_group.add_argument("--reasoning_pid_key", type=str, default="id")  # Patient-id field name inside reasoning jsonl rows.
-    reasoning_group.add_argument("--reasoning_text_key", type=str, default="reasoning")  # Reasoning-text field name inside reasoning jsonl rows.
+    reasoning_group.add_argument("--ehr_only_ablation", action=argparse.BooleanOptionalAction, default=False)
+    reasoning_group.add_argument("--reasoning_jsonl", type=str, default="")
+    reasoning_group.add_argument("--train_reasoning_jsonl", type=str, default="")
+    reasoning_group.add_argument("--train_cache_note", type=str, default="")
+    reasoning_group.add_argument("--train_cache_root", type=str, default="eval_generated_train_cache")
+    reasoning_group.add_argument("--train_subset_ratio", type=float, default=1.0)
+    reasoning_group.add_argument("--test_subset_ratio", type=float, default=1.0)
+    reasoning_group.add_argument("--subset_pos_ratio", type=float, default=-1.0)
+    reasoning_group.add_argument("--reasoning_pid_key", type=str, default="id")
+    reasoning_group.add_argument("--reasoning_text_key", type=str, default="reasoning")
 
     generator_group = ap.add_argument_group("Stage2 generator for reasoning")
-    generator_group.add_argument("--stage2_student_dir", type=str, default="")  # Stage2 student / checkpoint path used when reasoning must be generated.
-    generator_group.add_argument("--stage2_student_use_base_model", action=argparse.BooleanOptionalAction, default=False)  # Use only the student's base LLM for reasoning generation, without loading the LoRA adapter.
-    generator_group.add_argument("--generator_model_name", type=str, default="Qwen/Qwen3-4B-Instruct-2507")  # Base generator model used for reasoning generation, including the raw-base ablation.
-    generator_group.add_argument("--generator_torch_dtype", type=str, default="bfloat16")  # Torch dtype used when loading the generator.
-    generator_group.add_argument("--generator_max_prompt_tokens", type=int, default=2048)  # Maximum generator prompt length; longer prompts are left-truncated.
-    generator_group.add_argument("--eval_generator_max_new_tokens", type=int, default=256)  # Maximum newly generated tokens for eval/test/train reasoning generation.
-    generator_group.add_argument("--generation_batch_size", type=int, default=8)  # Batch size for generator-side reasoning generation.
-    generator_group.add_argument("--do_sample", action=argparse.BooleanOptionalAction, default=False)  # Whether reasoning generation uses sampling; False keeps generation deterministic/near-greedy.
-    generator_group.add_argument("--temperature", type=float, default=1.0)  # Sampling temperature when do_sample=True.
-    generator_group.add_argument("--top_p", type=float, default=1.0)  # Nucleus-sampling top-p when do_sample=True.
+    generator_group.add_argument("--stage2_student_dir", type=str, default="")
+    generator_group.add_argument("--stage2_student_use_base_model", action=argparse.BooleanOptionalAction, default=False)
+    generator_group.add_argument("--generator_model_name", type=str, default="Qwen/Qwen3-4B-Instruct-2507")
+    generator_group.add_argument("--generator_torch_dtype", type=str, default="bfloat16")
+    generator_group.add_argument("--generator_max_prompt_tokens", type=int, default=2048)
+    generator_group.add_argument("--eval_generator_max_new_tokens", type=int, default=256)
+    generator_group.add_argument("--generation_batch_size", type=int, default=8)
+    generator_group.add_argument("--do_sample", action=argparse.BooleanOptionalAction, default=False)
+    generator_group.add_argument("--temperature", type=float, default=1.0)
+    generator_group.add_argument("--top_p", type=float, default=1.0)
 
     scorer_group = ap.add_argument_group("Stage1 scorer")
-    scorer_group.add_argument("--stage1_scorer_dir", type=str, default="")  # Existing scorer checkpoint; required for eval-only mode, optional as retrain initialization.
-    scorer_group.add_argument("--scorer_model_name", type=str, default="Qwen/Qwen3-0.6B")  # Base scorer model used when the scorer is initialized from base instead of restored from a checkpoint.
-    scorer_group.add_argument("--scorer_max_length", type=int, default=5000)  # Maximum scorer input length.
-    scorer_group.add_argument("--score_bias", action=argparse.BooleanOptionalAction, default=False)  # Whether to use a bias term in the scorer head and load checkpoints under that assumption.
+    scorer_group.add_argument("--stage1_scorer_dir", type=str, default="")
+    scorer_group.add_argument("--scorer_model_name", type=str, default="Qwen/Qwen3-0.6B")
+    scorer_group.add_argument("--scorer_max_length", type=int, default=5000)
+    scorer_group.add_argument("--score_bias", action=argparse.BooleanOptionalAction, default=False)
 
     retrain_group = ap.add_argument_group("Stage1 scorer retraining")
-    retrain_group.add_argument("--train_scorer_on_reasoning", action=argparse.BooleanOptionalAction, default=False)  # Retrain/adapt the scorer inside this script before running the final evaluation.
-    retrain_group.add_argument("--trained_scorer_subdir", type=str, default="stage1_scorer_adapted")  # Subdirectory name used to save the retrained scorer.
-    retrain_group.add_argument("--stage1_epochs", type=int, default=1)  # Number of epochs for scorer retraining.
-    retrain_group.add_argument("--stage1_batch_size", type=int, default=2)  # Per-device batch size for scorer retraining.
-    retrain_group.add_argument("--stage1_grad_accum", type=int, default=4)  # Gradient-accumulation steps for scorer retraining.
-    retrain_group.add_argument("--stage1_lr", type=float, default=5e-5)  # Learning rate for scorer retraining.
-    retrain_group.add_argument("--stage1_lora_r", type=int, default=8)  # LoRA rank when the scorer is initialized from base and retrained with LoRA.
-    retrain_group.add_argument("--stage1_lora_alpha", type=int, default=16)  # LoRA alpha for scorer retraining.
-    retrain_group.add_argument("--stage1_lora_dropout", type=float, default=0.05)  # LoRA dropout for scorer retraining.
-    retrain_group.add_argument("--stage1_lora_last_n", type=int, default=8)  # Restrict scorer LoRA to the last N layers; 0 means no layer restriction.
-    retrain_group.add_argument("--stage1_score_only", action=argparse.BooleanOptionalAction, default=False)  # Retrain only the scorer head and skip LoRA updates.
-    retrain_group.add_argument("--stage1_disable_dropout", action=argparse.BooleanOptionalAction, default=True)  # Disable dropout during scorer retraining for more stable evaluation behavior.
-    retrain_group.add_argument("--save_steps", type=int, default=50)  # Checkpoint-save interval during scorer retraining.
-    retrain_group.add_argument("--log_steps", type=int, default=10)  # Logging interval during scorer retraining.
-    retrain_group.add_argument("--eval_steps", type=int, default=0)  # Periodic eval interval during scorer retraining; 0 disables periodic eval.
-    retrain_group.add_argument("--neg_per_pos", type=int, default=2)  # Number of negative pairs sampled per positive example during pairwise scorer training.
-    retrain_group.add_argument("--loss_type", type=str, default="pairwise_bce", choices=["pairwise", "pairwise_bce", "margin", "bce"])  # Loss type used for scorer retraining.
-    retrain_group.add_argument("--pointwise_alpha", type=float, default=0.2)  # Weight of the pointwise term when using a mixed loss.
-    retrain_group.add_argument("--pairwise_margin", type=float, default=0.0)  # Margin used by pairwise / margin-style scorer losses.
-    retrain_group.add_argument("--pos_weight", type=float, default=None)  # Positive-class weight for BCE-style losses; None leaves it unweighted.
-    retrain_group.add_argument("--margin", type=float, default=0.1)  # Margin value used by the margin loss.
-    retrain_group.add_argument("--margin_on_sigmoid", action="store_true", default=True)  # Apply the margin to sigmoid(score); this is the current default.
-    retrain_group.add_argument("--margin_on_logit", action="store_false", dest="margin_on_sigmoid")  # Instead apply the margin directly to raw logits.
-    retrain_group.add_argument("--train_drop_empty_baseline", action=argparse.BooleanOptionalAction, default=False)  # Filter train rows whose baseline dx and rx are both empty before scorer retraining.
-    retrain_group.add_argument("--train_drop_empty_dx", action=argparse.BooleanOptionalAction, default=False)  # Filter train rows whose baseline dx is empty before scorer retraining.
-    retrain_group.add_argument("--train_drop_dx1", action=argparse.BooleanOptionalAction, default=False)  # Filter train rows whose baseline dx count is <=1 before scorer retraining.
+    retrain_group.add_argument("--train_scorer_on_reasoning", action=argparse.BooleanOptionalAction, default=False)
+    retrain_group.add_argument("--trained_scorer_subdir", type=str, default="stage1_scorer_adapted")
+    retrain_group.add_argument("--stage1_epochs", type=int, default=1)
+    retrain_group.add_argument("--stage1_batch_size", type=int, default=2)
+    retrain_group.add_argument("--stage1_grad_accum", type=int, default=4)
+    retrain_group.add_argument("--stage1_lr", type=float, default=5e-5)
+    retrain_group.add_argument("--stage1_lora_r", type=int, default=8)
+    retrain_group.add_argument("--stage1_lora_alpha", type=int, default=16)
+    retrain_group.add_argument("--stage1_lora_dropout", type=float, default=0.05)
+    retrain_group.add_argument("--stage1_lora_last_n", type=int, default=8)
+    retrain_group.add_argument("--stage1_score_only", action=argparse.BooleanOptionalAction, default=False)
+    retrain_group.add_argument("--stage1_disable_dropout", action=argparse.BooleanOptionalAction, default=True)
+    retrain_group.add_argument("--save_steps", type=int, default=50)
+    retrain_group.add_argument("--log_steps", type=int, default=10)
+    retrain_group.add_argument("--eval_steps", type=int, default=0)
+    retrain_group.add_argument("--neg_per_pos", type=int, default=2)
+    retrain_group.add_argument("--loss_type", type=str, default="pairwise_bce", choices=["pairwise", "pairwise_bce", "margin", "bce"])
+    retrain_group.add_argument("--pointwise_alpha", type=float, default=0.2)
+    retrain_group.add_argument("--pairwise_margin", type=float, default=0.0)
+    retrain_group.add_argument("--pos_weight", type=float, default=None)
+    retrain_group.add_argument("--margin", type=float, default=0.1)
+    retrain_group.add_argument("--margin_on_sigmoid", action="store_true", default=True)
+    retrain_group.add_argument("--margin_on_logit", action="store_false", dest="margin_on_sigmoid")
+    retrain_group.add_argument("--train_drop_empty_baseline", action=argparse.BooleanOptionalAction, default=False)
+    retrain_group.add_argument("--train_drop_empty_dx", action=argparse.BooleanOptionalAction, default=False)
+    retrain_group.add_argument("--train_drop_dx1", action=argparse.BooleanOptionalAction, default=False)
 
     eval_group = ap.add_argument_group("Eval and final metrics")
-    eval_group.add_argument("--eval_batch_size", type=int, default=8)  # Scorer evaluation batch size.
-    eval_group.add_argument("--eval_sigmoid", action=argparse.BooleanOptionalAction, default=True)  # Apply sigmoid to scorer logits before computing evaluation metrics.
-    eval_group.add_argument("--drop_empty_baseline_final_eval", action=argparse.BooleanOptionalAction, default=False)  # Filter eval rows whose baseline dx and rx are both empty; applied consistently to train-time eval and final eval.
-    eval_group.add_argument("--drop_empty_dx_final_eval", action=argparse.BooleanOptionalAction, default=False)  # Filter eval rows whose baseline dx is empty, regardless of rx; stricter than drop_empty_baseline_final_eval.
-    eval_group.add_argument("--drop_dx1", action=argparse.BooleanOptionalAction, default=False)  # Filter eval rows whose baseline dx count is <=1; stricter than drop_empty_dx_final_eval.
+    eval_group.add_argument("--eval_batch_size", type=int, default=8)
+    eval_group.add_argument("--eval_sigmoid", action=argparse.BooleanOptionalAction, default=True)
+    eval_group.add_argument("--drop_empty_baseline_final_eval", action=argparse.BooleanOptionalAction, default=False)
+    eval_group.add_argument("--drop_empty_dx_final_eval", action=argparse.BooleanOptionalAction, default=False)
+    eval_group.add_argument("--drop_dx1", action=argparse.BooleanOptionalAction, default=False)
     return ap
 
 
@@ -193,7 +193,7 @@ def resolve_stage1_scorer_input_dir(path_str: str, dataset: str | None = None) -
             bases.append(root / path_str)
     for base in bases:
         if base.exists() and is_scorer_checkpoint_dir(base):
-            # print(f"resolve stage1 scorer: {base}\n", flush=True)
+
             return base
     raise FileNotFoundError(f"Unable to find exact stage1 scorer checkpoint: {path_str}")
 
@@ -575,7 +575,7 @@ def prepare_fixed_subset_cache(
         subset_ratio=subset_ratio,
         target_pos_ratio=target_pos_ratio,
         sample_seed=sample_seed,
-        # cache_dir=cache_dir,
+
         reasoning_jsonl=reasoning_path,
     )
     return sampled_rows, sampled_rows_path, reasoning_path
@@ -1698,7 +1698,7 @@ def train_scorer_on_reasoning(
         log_steps=args.log_steps,
         disable_dropout=bool(args.stage1_disable_dropout),
     )
-    # rcfg.disable_dropout = bool(args.stage1_disable_dropout)
+
 
     callbacks = []
     if int(args.eval_steps) > 0:
@@ -1739,12 +1739,12 @@ def train_scorer_on_reasoning(
     log_compact(
         "ScorerTrain",
         mode=train_reasoning_mode,
-        # train_jsonl=train_jsonl,
-        # train_examples=len(train_examples),
-        # train_reasoning_cache_jsonl=(None if bool(args.ehr_only_ablation) else train_reasoning_cache_path),
-        # train_reasoning_count=(None if bool(args.ehr_only_ablation) else len(train_reasoning_map)),
-        # pos_count=pos_count,
-        # neg_per_pos=args.neg_per_pos,
+
+
+
+
+
+
         pairs_per_epoch=pairs_per_epoch,
         steps_per_epoch=steps_per_epoch,
         max_steps=max_steps,

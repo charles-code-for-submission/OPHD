@@ -461,7 +461,7 @@ def build_stage1_lora_config(model, lora_last_n: int, lora_r: int) -> LoraConfig
         lora_dropout=0.05,
         bias="none",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-        # target_modules=["q_proj", "k_proj", "v_proj", "o_proj", 'gate_proj', 'up_proj', 'down_proj'],
+
         modules_to_save=["score"],
     )
     if int(lora_last_n) > 0:
@@ -515,8 +515,8 @@ def train_stage1_scorer(
         reasoning_map=train_reasoning_map,
         follow_up=follow_up_for_phase1
     )
-    # print(train_ds)
-    # sys.exit()
+
+
     pairs_per_epoch = pos_count * int(args.neg_per_pos)
     steps_per_epoch = math.ceil(pairs_per_epoch / (int(args.stage1_batch_size) * int(args.stage1_grad_accum)))
     max_steps = steps_per_epoch * int(args.stage1_epochs)
@@ -746,8 +746,8 @@ def eval_pointwise_with_progress(
         for i in iterator:
             batch = test_dataset[i : i + batch_size]
             labels = batch[label_key]
-            # print(batch)
-            # sys.exit()
+
+
             if "input_ids" in batch:
                 features = [
                     {
@@ -763,8 +763,8 @@ def eval_pointwise_with_progress(
                         return_tensors="pt",
                     )
                 enc = collator(features)
-                # print(enc, text_key)
-                # sys.exit()
+
+
             else:
                 texts = batch[text_key]
                 enc = tokenizer(
@@ -778,8 +778,8 @@ def eval_pointwise_with_progress(
 
             out = model(**enc)
             scores = out.logits.squeeze(-1)
-            # print(scores)
-            # sys.exit()
+
+
             raw_scores_all.append(scores.detach().float().cpu())
             if apply_sigmoid:
                 scores = torch.sigmoid(scores)
@@ -822,7 +822,7 @@ def generate_eval_reasoning_map(
             do_sample=do_sample,
             temperature=temperature,
             top_p=top_p,
-        )xw
+        )
         for example, text in zip(batch_examples, rollout.texts):
             reasoning_map[str(example.patient_id)] = str(text)
     return reasoning_map
@@ -888,7 +888,7 @@ def run_stage2_distill(
     )
     print('Set up generator model...')
     generator.freeze_all()
-    generator.enable_lora_updates() # free lora layers
+    generator.enable_lora_updates()
     optimizer = torch.optim.AdamW(generator.trainable_parameters(), lr=float(args.stage2_lr))
     total = sum(param.numel() for param in generator.model.parameters())
     trainable = sum(param.numel() for param in generator.model.parameters() if param.requires_grad)

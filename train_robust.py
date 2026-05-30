@@ -437,7 +437,7 @@ def build_stage1_lora_config(model, lora_last_n: int, lora_r: int) -> LoraConfig
         lora_dropout=0.05,
         bias="none",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-        # target_modules=["q_proj", "k_proj", "v_proj", "o_proj", 'gate_proj', 'up_proj', 'down_proj'],
+
         modules_to_save=["score"],
     )
     if int(lora_last_n) > 0:
@@ -491,8 +491,8 @@ def train_stage1_scorer(
         reasoning_map=train_reasoning_map,
         follow_up=follow_up_for_phase1
     )
-    # print(train_ds)
-    # sys.exit()
+
+
     pairs_per_epoch = pos_count * int(args.neg_per_pos)
     steps_per_epoch = math.ceil(pairs_per_epoch / (int(args.stage1_batch_size) * int(args.stage1_grad_accum)))
     max_steps = steps_per_epoch * int(args.stage1_epochs)
@@ -1104,7 +1104,7 @@ def run_stage2_distill(
     )
     print('Set up generator model...')
     generator.freeze_all()
-    generator.enable_lora_updates() # free lora layers
+    generator.enable_lora_updates()
     optimizer = torch.optim.AdamW(generator.trainable_parameters(), lr=float(args.stage2_lr))
     total = sum(param.numel() for param in generator.model.parameters())
     trainable = sum(param.numel() for param in generator.model.parameters() if param.requires_grad)
@@ -1174,7 +1174,7 @@ def run_stage2_distill(
         print(f"stage2_micro_batches={total_micro_batches}")
         print(f"stage2_optimizer_steps_this_epoch={optimizer_steps_this_epoch}")
         
-        # print('Train_batches:', len(train_batches), )
+
         optimizer.zero_grad(set_to_none=True)
         print('Start iterative steps...')
         accum_distill: list[float] = []
@@ -1544,7 +1544,7 @@ def main():
     stage1_group.add_argument("--scorer_model_name", type=str, default="Qwen/Qwen3-4B-Instruct-2507")
     stage1_group.add_argument("--scorer_max_length", type=int, default=5000)
     stage1_group.add_argument("--score_bias", action=argparse.BooleanOptionalAction, default=False)
-    # ap.add_argument("--stage1_scorer_dir", type=str, default='stage1_seed794_lr5e-4_lastn3_r2_bs2_ga4/stage1_scorer/checkpoint-640')
+
     stage1_group.add_argument("--stage1_scorer_dir", type=str, default='')
     stage1_group.add_argument("--stage1_epochs", type=int, default=1)
     stage1_group.add_argument("--stage1_batch_size", type=int, default=1)

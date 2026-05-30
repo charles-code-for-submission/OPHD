@@ -22,9 +22,9 @@ def target_token_logprob_gap(
     student_logits: torch.Tensor,
     target_ids: torch.Tensor,
 ) -> torch.Tensor:
-    # We only need the log-prob assigned to the sampled target token at each
-    # position. Computing gather(logits) - logsumexp(logits) avoids materializing
-    # full [B, T, V] log-prob tensors when we only need the chosen-token gap.
+
+
+
     teacher_selected_log_probs = target_token_logprobs_from_logits(teacher_logits, target_ids)
     student_selected_log_probs = target_token_logprobs_from_logits(student_logits, target_ids)
     return teacher_selected_log_probs - student_selected_log_probs
@@ -50,8 +50,8 @@ def masked_forward_kl(
     student_logits: torch.Tensor,
     token_mask: torch.Tensor,
 ) -> torch.Tensor:
-    # Keep the zero-loss case attached to the student graph so backward() is safe
-    # even when no tokens are selected for distillation.
+
+
     zero = student_logits.sum() * 0.0
     if token_mask.numel() == 0:
         return zero
@@ -59,8 +59,8 @@ def masked_forward_kl(
     if not bool(token_mask.any().item()):
         return zero
 
-    # Select only masked positions before softmax/KL so sparse coverage does not
-    # materialize full [B, T, V] intermediates.
+
+
     selected_student_logits = student_logits[token_mask].float()
     if selected_student_logits.numel() == 0:
         return zero

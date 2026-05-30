@@ -100,7 +100,7 @@ class ClinicalReasoningPrompter:
         example: Example,
         age: int | None,
     ) -> str:
-        # modified jan21
+
         return ( 
         f"You are a national-level experienced physician with expertise in {fullname} ({shortname}). "
         "You are interpreting EHR records to understand patient-level clinical patterns. "
@@ -136,12 +136,12 @@ class ClinicalReasoningPrompter:
         "- Do NOT state or imply future risk, likelihood, concern, probability, or time horizon.\n"
         "- Do NOT enumerate diseases or codes as a list.\n"
         f"- Do NOT state whether the patient will or will not develop {shortname}.\n\n"
-        # "- Do NOT reference follow-up information or future outcomes.\n"
 
-        # f"Training-only follow-up (newly emerged during the aforementioned follow-up period; do not mention in the output):\n"
-        # f"Follow-up diagnoses: {self._format_prompt_list(example.delta_codes_diagnosis)}\n"
-        # f"Follow-up medications: {self._format_prompt_list(example.delta_codes_medication)}\n"
-        # f"Follow-up outcome (Does the patient develop into AD at the outcome window): {self._format_prompt_label(example.label)}\n\n"
+
+
+
+
+
         f"Baseline demographics: Age ({self._format_prompt_age(age)}), Sex ({self._format_prompt_sex(example.sex)}).\n"
         f"Baseline diagnoses: {self._format_prompt_list(example.base_codes_diagnosis)}\n"
         f"Baseline medications: {self._format_prompt_list(example.base_codes_medication)}\n\n"
@@ -160,7 +160,7 @@ class ClinicalReasoningPrompter:
         example: Example,
         age: int | None,
     ) -> str:
-        # modified jan21
+
         return ( 
         f"You are a national-level experienced physician with expertise in {fullname} ({shortname}). "
         "You are interpreting EHR records to understand patient-level clinical patterns. "
@@ -196,12 +196,12 @@ class ClinicalReasoningPrompter:
         "- Do NOT state or imply future risk, likelihood, concern, probability, or time horizon.\n"
         "- Do NOT enumerate diseases or codes as a list.\n"
         f"- Do NOT state whether the patient will or will not develop {shortname}.\n\n"
-        # "- Do NOT reference follow-up information or future outcomes.\n"
 
-        # f"Training-only follow-up (newly emerged during the aforementioned follow-up period; do not mention in the output):\n"
-        # f"Follow-up diagnoses: {self._format_prompt_list(example.delta_codes_diagnosis)}\n"
-        # f"Follow-up medications: {self._format_prompt_list(example.delta_codes_medication)}\n"
-        # f"Follow-up outcome (Does the patient develop into AD at the outcome window): {self._format_prompt_label(example.label)}\n\n"
+
+
+
+
+
         f"Baseline demographics: Age ({self._format_prompt_age(age)}), Sex ({self._format_prompt_sex(example.sex)}).\n"
         f"Baseline diagnoses: {self._format_prompt_list(example.base_codes_diagnosis)}\n"
         f"Baseline medications: {self._format_prompt_list(example.base_codes_medication)}\n\n"
@@ -220,7 +220,7 @@ class ClinicalReasoningPrompter:
         example: Example,
         age: int | None,
     ) -> str:
-        # modified jan21
+
         return ( 
         f"You are a national-level experienced physician with expertise in {fullname} ({shortname}). "
         "You are interpreting EHR records to understand patient-level clinical patterns. "
@@ -256,7 +256,7 @@ class ClinicalReasoningPrompter:
         "- Do NOT state or imply future risk, likelihood, concern, probability, or time horizon.\n"
         "- Do NOT enumerate diseases or codes as a list.\n"
         f"- Do NOT state whether the patient will or will not develop {shortname}.\n\n"
-        # "- Do NOT reference follow-up information or future outcomes.\n"
+
 
         f"Training-only follow-up (newly emerged during the aforementioned follow-up period; do not mention in the output):\n"
         f"Follow-up diagnoses: {self._format_prompt_list(example.delta_codes_diagnosis)}\n"
@@ -303,10 +303,10 @@ class ClinicalReasoningPrompter:
         if self.dataset == "ad":
             if include_followup:
                 tprompt = self._build_ad_teacher_prompt(example=example, age=age)
-                # print('tprompt', tprompt)
+
                 return tprompt
             sprompt = self._build_ad_student_prompt(example=example, age=age)
-            # print('sprompt', sprompt)
+
             return sprompt
         if self.dataset == "adrd":
             if include_followup:
@@ -317,8 +317,8 @@ class ClinicalReasoningPrompter:
                 return _build_pd_teacher_prompt(example=example, age=age)
             return _build_pd_student_prompt(example=example, age=age)
 
-        # Legacy prompt modules for non-AD datasets may still emit follow-up text
-        # even when follow-up codes are empty, so keep the old stripping path here.
+
+
         delta_dx = example.delta_codes_diagnosis if include_followup else []
         delta_md = example.delta_codes_medication if include_followup else []
         prompt = self.module.clinical_reasoning_prompt(
