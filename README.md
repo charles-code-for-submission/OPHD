@@ -1,6 +1,6 @@
 # OPHD
 
-We evaluate the proposed model using real-world healthcare data and leverage the national [All of Us Research Platform](https://www.researchallofus.org/) and [OHSU EHR data warehouse](https://research-data-catalog.ohsu.edu/records/ksqgw-95972).
+We evaluate the proposed model using real-world healthcare data and leverage the national [All of Us Research Platform](https://www.researchallofus.org/) and [OHSU EHR data warehouse](https://www.ohsu.edu/octri/powering-innovation-and-translational-science-octri-informatics).
 
 ## Environment
 
